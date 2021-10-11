@@ -1,4 +1,4 @@
-# This file is part of grammar-to-md
+# This file is part of grammar2md
 # Copyright (C) 2021  Natan Junges <natanajunges@gmail.com>
 #
 # grammar2md is free software: you can redistribute it and/or modify
