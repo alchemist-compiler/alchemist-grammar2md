@@ -14,6 +14,44 @@
 # You should have received a copy of the GNU General Public License
 # along with Alchemist grammar2md.  If not, see <https://www.gnu.org/licenses/>.
 
+def skip_literals(line, i):
+    if line[i] == "\"":
+        j = 1
+
+        while i + j < len(line):
+            if line[i + j] == "\\":
+                j += 2
+            elif line[i + j] == "\"":
+                j += 1
+                break
+            else:
+                j += 1
+
+        return j
+
+    return 0
+
+def process_nonterminal(line, i, production, terminals, link = False):
+    if line[i].isalpha():
+        j = i + 1
+
+        while j < len(line) and line[j].isalnum():
+            j += 1
+
+        symbol = line[i:j]
+
+        if link ^ (symbol == production or symbol in terminals):
+            if link:
+                symbol = "[_" + symbol + "_](#" + symbol + ")"
+            else:
+                symbol = "_" + symbol + "_"
+
+            line = line[:i] + symbol + line[j:]
+
+        return (line, len(symbol))
+
+    return (None, 0)
+
 def generate(input, terminals = {}, title = None):
     input = input.replace("\r\n", "\n")
     input = input.replace("\n\r", "\n")
@@ -45,51 +83,26 @@ def generate(input, terminals = {}, title = None):
                 i = 0
 
                 while i < len(line):
-                    if line[i] == "\\":
-                        i += 2
-                    elif line[i] == "\"":
-                        i += 1
+                    j = skip_literals(line, i)
 
-                        while i < len(line):
-                            if line[i] == "\\":
-                                i += 2
-                            elif line[i] == "\"":
-                                i += 1
-                                break
-                            else:
-                                i += 1
-                    elif line[i].isalpha():
-                        j = i + 1
-
-                        while j < len(line) and line[j].isalnum():
-                            j += 1
-
-                        symbol = line[i:j]
-
-                        if symbol == production or symbol in terminals:
-                            symbol = "_" + symbol + "_"
-                            line = line[:i] + symbol + line[j:]
-
-                        i += len(symbol)
+                    if j > 0:
+                        i += j
                     else:
-                        i += 1
+                        line_i = process_nonterminal(line, i, production, terminals)
+
+                        if line_i[1] > 0:
+                            line = line_i[0]
+                            i += line_i[1]
+                        else:
+                            i += 1
 
                 i = 0
 
                 while i < len(line):
-                    if line[i] == "\\":
-                        i += 2
-                    elif line[i] == "\"":
-                        i += 1
+                    j = skip_literals(line, i)
 
-                        while i < len(line):
-                            if line[i] == "\\":
-                                i += 2
-                            elif line[i] == "\"":
-                                i += 1
-                                break
-                            else:
-                                i += 1
+                    if j > 0:
+                        i += j
                     elif line[i] in ["[", "]", "{", "}"]:
                         if (((i == 0 or line[i - 1] not in ["*", "\"", "_"]) and
                              (i < len(line) - 1 and line[i + 1] == "_")) or
@@ -107,34 +120,18 @@ def generate(input, terminals = {}, title = None):
                 i = 0
 
                 while i < len(line):
-                    if line[i] == "\\":
-                        i += 2
-                    elif line[i] == "\"":
-                        i += 1
+                    j = skip_literals(line, i)
 
-                        while i < len(line):
-                            if line[i] == "\\":
-                                i += 2
-                            elif line[i] == "\"":
-                                i += 1
-                                break
-                            else:
-                                i += 1
-                    elif line[i].isalpha():
-                        j = i + 1
-
-                        while j < len(line) and line[j].isalnum():
-                            j += 1
-
-                        symbol = line[i:j]
-
-                        if symbol != production and symbol not in terminals:
-                            symbol = "[_" + symbol + "_](#" + symbol + ")"
-                            line = line[:i] + symbol + line[j:]
-
-                        i += len(symbol)
+                    if j > 0:
+                        i += j
                     else:
-                        i += 1
+                        line_i = process_nonterminal(line, i, production, terminals, True)
+
+                        if line_i[1] > 0:
+                            line = line_i[0]
+                            i += line_i[1]
+                        else:
+                            i += 1
 
                 line = line.replace("\"", "**")
                 line += "  "
