@@ -14,9 +14,11 @@
 # You should have received a copy of the GNU General Public License
 # along with Alchemist grammar2md.  If not, see <https://www.gnu.org/licenses/>.
 
-def skip_literals(line, i):
+from typing import Optional
+
+def skip_literals(line: str, i: int) -> int:
     if line[i] == "\"":
-        j = 1
+        j: int = 1
 
         while i + j < len(line):
             if line[i + j] == "\\":
@@ -31,14 +33,14 @@ def skip_literals(line, i):
 
     return 0
 
-def process_nonterminal(line, i, production, terminals, link = False):
+def process_nonterminal(line: str, i: int, production: str, terminals: set[str], link: bool = False) -> tuple[Optional[str], int]:
     if line[i].isalpha():
-        j = i + 1
+        j: int = i + 1
 
         while j < len(line) and line[j].isalnum():
             j += 1
 
-        symbol = line[i:j]
+        symbol: str = line[i:j]
 
         if link ^ (symbol == production or symbol in terminals):
             if link:
@@ -52,17 +54,17 @@ def process_nonterminal(line, i, production, terminals, link = False):
 
     return (None, 0)
 
-def generate(input, terminals = {}, title = None):
+def generate(input: str, terminals: set[str] = {}, title: Optional[str] = None) -> str:
     input = input.replace("\r\n", "\n")
     input = input.replace("\n\r", "\n")
     input = input.replace("\r", "\n")
     input = input.replace("_", "\\_")
     input = input.replace("*", "\\*")
-    lines = input.split("\n")
-    production = ""
+    lines: list[str] = input.split("\n")
+    production: str = ""
 
     for l in range(len(lines)):
-        line = lines[l]
+        line: str = lines[l]
 
         if line == "--":
             line += "-"
@@ -74,21 +76,21 @@ def generate(input, terminals = {}, title = None):
         elif ((len(line) > 8 and line[0:8] == " " * 8 and line[8].isprintable() and line[8] != " ") or
               (len(line) > 4 and line[0:4] == " " * 4 and line[4].isprintable() and line[4] != " ") or
               (len(line) > 2 and line[0:2] == " " * 2 and line[2].isprintable() and line[2] != " ") or
-              (len(line) > 1 and line[0] in [" ", "\t"] and line[1].isprintable() and line[1] != " ")):
+              (len(line) > 1 and line[0] in {" ", "\t"} and line[1].isprintable() and line[1] != " ")):
             line = line.lstrip(" \t")
 
             if line == "(one of)":
                 line = "_" + line + "_  "
             else:
-                i = 0
+                i: int = 0
 
                 while i < len(line):
-                    j = skip_literals(line, i)
+                    j: int = skip_literals(line, i)
 
                     if j > 0:
                         i += j
                     else:
-                        line_i = process_nonterminal(line, i, production, terminals)
+                        line_i: tuple[Optional[str], int] = process_nonterminal(line, i, production, terminals)
 
                         if line_i[1] > 0:
                             line = line_i[0]
@@ -99,15 +101,15 @@ def generate(input, terminals = {}, title = None):
                 i = 0
 
                 while i < len(line):
-                    j = skip_literals(line, i)
+                    j: int = skip_literals(line, i)
 
                     if j > 0:
                         i += j
-                    elif line[i] in ["[", "]", "{", "}"]:
-                        if (((i == 0 or line[i - 1] not in ["*", "\"", "_"]) and
+                    elif line[i] in {"[", "]", "{", "}"}:
+                        if (((i == 0 or line[i - 1] not in {"*", "\"", "_"}) and
                              (i < len(line) - 1 and line[i + 1] == "_")) or
                             ((i > 0 and line[i - 1] == "_") and
-                             (i == len(line) - 1 or line[i + 1] not in ["*", "\""]))):
+                             (i == len(line) - 1 or line[i + 1] not in {"*", "\""}))):
                             symbol = "*" + line[i] + "*"
                         else:
                             symbol = "_" + line[i] + "_"
@@ -120,12 +122,12 @@ def generate(input, terminals = {}, title = None):
                 i = 0
 
                 while i < len(line):
-                    j = skip_literals(line, i)
+                    j: int = skip_literals(line, i)
 
                     if j > 0:
                         i += j
                     else:
-                        line_i = process_nonterminal(line, i, production, terminals, True)
+                        line_i: tuple[Optional[str], int] = process_nonterminal(line, i, production, terminals, True)
 
                         if line_i[1] > 0:
                             line = line_i[0]
