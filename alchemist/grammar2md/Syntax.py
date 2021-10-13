@@ -16,7 +16,7 @@
 
 from typing import Optional
 
-def skip_literals(line: str, i: int) -> int:
+def skip_literal(line: str, i: int) -> int:
     if line[i] == "\"":
         j: int = 1
 
@@ -33,7 +33,7 @@ def skip_literals(line: str, i: int) -> int:
 
     return 0
 
-def process_nonterminal(line: str, i: int, production: str, terminals: set[str], link: bool = False) -> tuple[Optional[str], int]:
+def process_non_terminal(line: str, i: int, production: str, terminals: set[str], link: bool = False) -> tuple[Optional[str], int]:
     if line[i].isalpha():
         j: int = i + 1
 
@@ -54,7 +54,7 @@ def process_nonterminal(line: str, i: int, production: str, terminals: set[str],
 
     return (None, 0)
 
-def generate(input: str, terminals: set[str] = {}, title: Optional[str] = None) -> str:
+def generate(input: str, terminals: set[str] = {}, semantics: Optional[str] = None) -> str:
     input = input.replace("\r\n", "\n")
     input = input.replace("\n\r", "\n")
     input = input.replace("\r", "\n")
@@ -71,7 +71,12 @@ def generate(input: str, terminals: set[str] = {}, title: Optional[str] = None) 
             lines[l] = line
         elif len(line) > 1 and line[-1] == ":":
             production = line[:-1]
-            line = ("## " if title != None else "# ") + line
+
+            if semantics != None:
+                line = "## [" + production + "](" + semantics + "#" + production + "):"
+            else:
+                line = "## " + line
+
             lines[l] = line
         elif ((len(line) > 8 and line[0:8] == " " * 8 and line[8].isprintable() and line[8] != " ") or
               (len(line) > 4 and line[0:4] == " " * 4 and line[4].isprintable() and line[4] != " ") or
@@ -85,12 +90,12 @@ def generate(input: str, terminals: set[str] = {}, title: Optional[str] = None) 
                 i: int = 0
 
                 while i < len(line):
-                    j: int = skip_literals(line, i)
+                    j: int = skip_literal(line, i)
 
                     if j > 0:
                         i += j
                     else:
-                        line_i: tuple[Optional[str], int] = process_nonterminal(line, i, production, terminals)
+                        line_i: tuple[Optional[str], int] = process_non_terminal(line, i, production, terminals)
 
                         if line_i[1] > 0:
                             line = line_i[0]
@@ -101,7 +106,7 @@ def generate(input: str, terminals: set[str] = {}, title: Optional[str] = None) 
                 i = 0
 
                 while i < len(line):
-                    j: int = skip_literals(line, i)
+                    j: int = skip_literal(line, i)
 
                     if j > 0:
                         i += j
@@ -122,12 +127,12 @@ def generate(input: str, terminals: set[str] = {}, title: Optional[str] = None) 
                 i = 0
 
                 while i < len(line):
-                    j: int = skip_literals(line, i)
+                    j: int = skip_literal(line, i)
 
                     if j > 0:
                         i += j
                     else:
-                        line_i: tuple[Optional[str], int] = process_nonterminal(line, i, production, terminals, True)
+                        line_i: tuple[Optional[str], int] = process_non_terminal(line, i, production, terminals, True)
 
                         if line_i[1] > 0:
                             line = line_i[0]
@@ -139,8 +144,5 @@ def generate(input: str, terminals: set[str] = {}, title: Optional[str] = None) 
                 line += "  "
 
             lines[l] = line
-
-    if title != None:
-        lines = ["# " + title, ""] + lines
 
     return "\n".join(lines)
