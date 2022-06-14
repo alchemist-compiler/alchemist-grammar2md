@@ -54,7 +54,7 @@ def process_non_terminal(line: str, i: int, production: str, terminals: set[str]
 
     return (None, 0)
 
-def generate(input: str, terminals: set[str] = {}, semantics: Optional[str] = None) -> str:
+def generate(input: str, level: int, terminals: set[str] = {}, semantics: Optional[str] = None) -> str:
     input = input.replace("\r\n", "\n")
     input = input.replace("\n\r", "\n")
     input = input.replace("\r", "\n")
@@ -71,11 +71,12 @@ def generate(input: str, terminals: set[str] = {}, semantics: Optional[str] = No
             lines[l] = line
         elif len(line) > 1 and line[-1] == ":":
             production = line[:-1]
+            line = "#" * level + " "
 
             if semantics != None:
-                line = "## [" + production + "](" + semantics + "#" + production + "):"
+                line += "[" + production + "](" + semantics + "#" + production + "):"
             else:
-                line = "## " + line
+                line += production + ":"
 
             lines[l] = line
         elif ((len(line) > 8 and line[0:8] == " " * 8 and line[8].isprintable() and line[8] != " ") or
@@ -111,19 +112,13 @@ def generate(input: str, terminals: set[str] = {}, semantics: Optional[str] = No
                     if j > 0:
                         i += j
                     elif line[i] in {"[", "]", "{", "}"}:
-                        if (((i == 0 or line[i - 1] not in {"*", "\"", "_"}) and
-                             (i < len(line) - 1 and line[i + 1] == "_")) or
-                            ((i > 0 and line[i - 1] == "_") and
-                             (i == len(line) - 1 or line[i + 1] not in {"*", "\""}))):
-                            symbol = "*" + line[i] + "*"
-                        else:
-                            symbol = "_" + line[i] + "_"
-
+                        symbol = "_" + line[i] + "_"
                         line = line[:i] + symbol + line[i + 1:]
                         i += 3
                     else:
                         i += 1
 
+                line = line.replace("__", "")
                 i = 0
 
                 while i < len(line):
@@ -140,7 +135,9 @@ def generate(input: str, terminals: set[str] = {}, semantics: Optional[str] = No
                         else:
                             i += 1
 
+                line = line.replace("\\\"", "\n")
                 line = line.replace("\"", "**")
+                line = line.replace("\n", "\\\"")
                 line += "  "
 
             lines[l] = line
