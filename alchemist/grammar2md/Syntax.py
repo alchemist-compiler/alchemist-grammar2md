@@ -66,10 +66,7 @@ def generate(input: str, level: int, terminals: set[str] = {}, semantics: Option
     for l in range(len(lines)):
         line: str = lines[l]
 
-        if line == "--":
-            line += "-"
-            lines[l] = line
-        elif len(line) > 1 and line[-1] == ":":
+        if len(line) > 1 and line[-1] == ":":
             production = line[:-1]
             line = "#" * level + " "
 
