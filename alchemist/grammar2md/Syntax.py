@@ -116,6 +116,7 @@ def generate(input: str, level: int, terminals: set[str] = {}, semantics: Option
                         i += 1
 
                 line = line.replace("__", "")
+                line = line.replace("_ _", " ")
                 i = 0
 
                 while i < len(line):
@@ -134,6 +135,7 @@ def generate(input: str, level: int, terminals: set[str] = {}, semantics: Option
 
                 line = line.replace("\\\"", "\n")
                 line = line.replace("\"", "**")
+                line = line.replace("** **", " ")
                 line = line.replace("\n", "\\\"")
                 line += "  "
 
