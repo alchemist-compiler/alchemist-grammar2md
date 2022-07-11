@@ -66,7 +66,10 @@ def generate(input: str, level: int, terminals: set[str] = {}, semantics: Option
     for l in range(len(lines)):
         line: str = lines[l]
 
-        if len(line) > 1 and line[-1] == ":":
+        if line == "---":
+            line = "\\" + line
+            lines[l] = line
+        elif len(line) > 1 and line[-1] == ":":
             production = line[:-1]
             line = "#" * level + " "
 
@@ -83,7 +86,7 @@ def generate(input: str, level: int, terminals: set[str] = {}, semantics: Option
             line = line.lstrip(" \t")
 
             if line == "(one of)":
-                line = "_" + line + "_  "
+                line = "&emsp;&emsp;_" + line + "_  "
             else:
                 i: int = 0
 
@@ -137,7 +140,7 @@ def generate(input: str, level: int, terminals: set[str] = {}, semantics: Option
                 line = line.replace("\"", "**")
                 line = line.replace("** **", " ")
                 line = line.replace("\n", "\\\"")
-                line += "  "
+                line = "&emsp;&emsp;" + line + "  "
 
             lines[l] = line
 
