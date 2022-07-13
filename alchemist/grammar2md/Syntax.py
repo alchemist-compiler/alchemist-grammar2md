@@ -30,6 +30,17 @@ def skip_literal(line: str, i: int) -> int:
                 j += 1
 
         return j
+    elif line[i:i+2] == "[^":
+        j: int = 2
+
+        while i + j < len(line):
+            if line[i + j] == "]":
+                j += 1
+                break
+            else:
+                j += 1
+
+        return j
 
     return 0
 
@@ -135,6 +146,27 @@ def generate(input: str, level: int, terminals: set[str] = {}, semantics: Option
                             i += line_i[1]
                         else:
                             i += 1
+
+                i = 0
+                tag_opened = False
+
+                while i < len(line):
+                    j: int = skip_literal(line, i)
+
+                    if j > 0:
+                        i += j
+                    elif line[i] == "`":
+                        if tag_opened:
+                            symbol = "</code>"
+                            tag_opened = False
+                        else:
+                            symbol = "<code>"
+                            tag_opened = True
+
+                        line = line[:i] + symbol + line[i + 1:]
+                        i += len(symbol)
+                    else:
+                        i += 1
 
                 line = line.replace("\\\"", "\n")
                 line = line.replace("\"", "**")
