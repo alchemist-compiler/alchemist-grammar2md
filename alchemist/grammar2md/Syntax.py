@@ -14,11 +14,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Alchemist grammar2md.  If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Optional
-
-def skip_literal(line: str, i: int) -> int:
+def skip_literal(line, i):
     if line[i] == "\"":
-        j: int = 1
+        j = 1
 
         while i + j < len(line):
             if line[i + j] == "\\":
@@ -31,7 +29,7 @@ def skip_literal(line: str, i: int) -> int:
 
         return j
     elif line[i:i+2] == "[^":
-        j: int = 2
+        j = 2
 
         while i + j < len(line):
             if line[i + j] == "]":
@@ -44,14 +42,14 @@ def skip_literal(line: str, i: int) -> int:
 
     return 0
 
-def process_non_terminal(line: str, i: int, production: str, terminals: set[str], link: bool = False) -> tuple[Optional[str], int]:
+def process_non_terminal(line, i, production, terminals, link=False):
     if line[i].isalpha():
-        j: int = i + 1
+        j = i + 1
 
         while j < len(line) and line[j].isalnum():
             j += 1
 
-        symbol: str = line[i:j]
+        symbol = line[i:j]
 
         if link ^ (symbol == production or symbol in terminals):
             if link:
@@ -65,17 +63,17 @@ def process_non_terminal(line: str, i: int, production: str, terminals: set[str]
 
     return (None, 0)
 
-def generate(input: str, level: int, terminals: set[str] = {}, semantics: Optional[str] = None) -> str:
+def generate(input, level, terminals={}, semantics=None):
     input = input.replace("\r\n", "\n")
     input = input.replace("\n\r", "\n")
     input = input.replace("\r", "\n")
     input = input.replace("_", "\\_")
     input = input.replace("*", "\\*")
-    lines: list[str] = input.split("\n")
-    production: str = ""
+    lines = input.split("\n")
+    production = ""
 
     for l in range(len(lines)):
-        line: str = lines[l]
+        line = lines[l]
 
         if line == "---":
             line = "\\" + line
@@ -99,15 +97,15 @@ def generate(input: str, level: int, terminals: set[str] = {}, semantics: Option
             if line == "(one of)":
                 line = "&emsp;&emsp;_" + line + "_  "
             else:
-                i: int = 0
+                i = 0
 
                 while i < len(line):
-                    j: int = skip_literal(line, i)
+                    j = skip_literal(line, i)
 
                     if j > 0:
                         i += j
                     else:
-                        line_i: tuple[Optional[str], int] = process_non_terminal(line, i, production, terminals)
+                        line_i = process_non_terminal(line, i, production, terminals)
 
                         if line_i[1] > 0:
                             line = line_i[0]
@@ -118,7 +116,7 @@ def generate(input: str, level: int, terminals: set[str] = {}, semantics: Option
                 i = 0
 
                 while i < len(line):
-                    j: int = skip_literal(line, i)
+                    j = skip_literal(line, i)
 
                     if j > 0:
                         i += j
@@ -134,12 +132,12 @@ def generate(input: str, level: int, terminals: set[str] = {}, semantics: Option
                 i = 0
 
                 while i < len(line):
-                    j: int = skip_literal(line, i)
+                    j = skip_literal(line, i)
 
                     if j > 0:
                         i += j
                     else:
-                        line_i: tuple[Optional[str], int] = process_non_terminal(line, i, production, terminals, True)
+                        line_i = process_non_terminal(line, i, production, terminals, True)
 
                         if line_i[1] > 0:
                             line = line_i[0]
@@ -151,7 +149,7 @@ def generate(input: str, level: int, terminals: set[str] = {}, semantics: Option
                 tag_opened = False
 
                 while i < len(line):
-                    j: int = skip_literal(line, i)
+                    j = skip_literal(line, i)
 
                     if j > 0:
                         i += j
